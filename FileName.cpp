@@ -6,11 +6,16 @@ using namespace cv;
 Mat src(500, 1000, CV_8UC3, Scalar(255, 255, 255));
 Point pt0ld;
 void on_mouse(int event, int x, int y, int flags, void*);
-
+void savethefile(Mat& savefile);
+void loadthefile(Mat& savefile);
+void clearthefile(Mat& savefile);
+void runthefile(Mat& savefile);
 void box(Mat& src);
 void puttext(Mat& src);
 int countcontours(const Mat& savefile);
+void momento(Mat& savefile);
 Mat grayy(const Mat& savefile);
+string name;
 
 int main(void)
 {
@@ -33,50 +38,23 @@ void on_mouse(int event, int x, int y, int flags, void*)
 	Rect areae(500, 400, 250, 100);
 	Rect areacon(750, 0, 250, 100);
 	Mat savefile;
-	string name;
-	savefile = src(Rect(0, 0, 500, 500));
+	savefile = src(Rect(2, 2, 495, 490));
 
 	switch (event) {
 	case EVENT_LBUTTONDOWN:
 		pt0ld = Point(x, y);
 		if (areas.contains(pt0ld)) {						//save
-			cout << "save" << endl;
-			cout << "파일이름 입력(.jpg포함): ";
-			cin >> name;
-			imwrite(name, savefile);
+			savethefile(savefile);
 		}
 		if (areal.contains(pt0ld)) {						//load
-			cout << "load" << endl;
-		load_image:
-			cout << "불러올 파일 이름 입력(.jpg포함) : ";
-			cin >> name;
-			savefile = imread(name);
-			if (savefile.empty())
-			{
-				cerr << "Image Loaded Failed!" << endl;
-				goto load_image;
-			}
-			Mat roi = src(Rect(0, 0, 500, 500));
-			savefile.copyTo(roi);
+			loadthefile(savefile);
 		}
 		if (areac.contains(pt0ld))
 		{						//clear
-			cout << "clear" << endl;
-			savefile = (500, 500, CV_8UC3, Scalar(255, 255, 255));
-			rectangle(src, Point(0, 0), Point(500, 500), Scalar(0, 0, 0), 2);
+			clearthefile(savefile);
 		}
 		if (arear.contains(pt0ld)) {
-			int numContours = countcontours(savefile);					//run
-			cout << "run" << endl;
-			if (numContours == 3) {
-				cout << "8" << endl;
-			}
-			if (numContours == 2) {
-				cout << "0, 6, 9" << endl;
-			}
-			if (numContours == 1) {
-				cout << "1, 2, 3, 4, 5, 7"<< endl;
-			}
+			runthefile(savefile);
 		}
 		if (areae.contains(pt0ld)) {						//exit
 			cout << "exit" << endl;
@@ -85,6 +63,7 @@ void on_mouse(int event, int x, int y, int flags, void*)
 		if (areacon.contains(pt0ld)) {
 			int numContours = countcontours(savefile);
 			cout << "외곽선의 갯수: " << numContours << endl;
+			momento(savefile);
 		}
 		break;
 
@@ -174,7 +153,6 @@ int countcontours(const Mat& savefile)
 {
 	vector<vector<Point>> contours;
 	findContours(grayy(savefile), contours, RETR_LIST, CHAIN_APPROX_NONE);
-	
 	return contours.size();
 }
 Mat grayy(const Mat& savefile)
@@ -183,9 +161,63 @@ Mat grayy(const Mat& savefile)
 	cvtColor(savefile, gray, COLOR_BGR2GRAY);
 	threshold(gray, gray, 0, 255, THRESH_BINARY_INV | THRESH_OTSU);
 
-	Mat element = getStructuringElement(MORPH_RECT, Size(5, 5));
-	erode(gray, gray, element);
-	dilate(gray, gray, element);
-
+	morphologyEx(gray, gray, MORPH_CLOSE, Mat(15, 15, CV_8UC1), Point(-1, -1));
+	imshow("gray", gray);
 	return gray;
+}
+void momento(Mat& savefile) 
+{
+	Mat tmp;
+	savefile.copyTo(tmp);
+	vector<vector<Point>> contours;
+	findContours(grayy(savefile), contours, RETR_LIST, CHAIN_APPROX_NONE);
+	for (int i = 0; i < contours.size(); i++) {
+		Moments momento = moments(contours[i]);
+		double cX = momento.m10 / momento.m00;
+		double cY = momento.m01 / momento.m00;
+		circle(tmp, Point(static_cast<int>(cX), static_cast<int>(cY)), 5, cv::Scalar(0, 0, 255), -1);
+	}
+	imshow("tmp", tmp);
+}
+void savethefile(Mat& savefile)
+{
+	cout << "save" << endl;
+	cout << "파일이름 입력(.jpg포함): ";
+	cin >> name;
+	imwrite(name, savefile);
+}
+void loadthefile(Mat& savefile)
+{
+	cout << "load" << endl;
+load_image:
+	cout << "불러올 파일 이름 입력(.jpg포함) : ";
+	cin >> name;
+	savefile = imread(name);
+	if (savefile.empty())
+	{
+		cerr << "Image Loaded Failed!" << endl;
+		goto load_image;
+	}
+	Mat roi = src(Rect(2, 2, 495, 490));
+	savefile.copyTo(roi);
+}
+void clearthefile(Mat& savefile)
+{
+	cout << "clear" << endl;
+	savefile = (500, 500, CV_8UC3, Scalar(255, 255, 255));
+	rectangle(src, Point(0, 0), Point(500, 500), Scalar(0, 0, 0), 2);
+}
+void runthefile(Mat& savefile)
+{
+	int numContours = countcontours(savefile);					//run
+	cout << "run" << endl;
+	if (numContours == 3) {
+		cout << "8" << endl;
+	}
+	if (numContours == 2) {
+		cout << "0, 6, 9" << endl;
+	}
+	if (numContours == 1) {
+		cout << "1, 2, 3, 4, 5, 7" << endl;
+	}
 }
