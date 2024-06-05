@@ -3,12 +3,14 @@
 using namespace std;
 using namespace cv;
 
-Mat src(500, 750, CV_8UC3, Scalar(255, 255, 255));
+Mat src(500, 1000, CV_8UC3, Scalar(255, 255, 255));
 Point pt0ld;
 void on_mouse(int event, int x, int y, int flags, void*);
-void detect(Mat& savefile);
+
 void box(Mat& src);
 void puttext(Mat& src);
+int countcontours(const Mat& savefile);
+Mat grayy(const Mat& savefile);
 
 int main(void)
 {
@@ -29,6 +31,7 @@ void on_mouse(int event, int x, int y, int flags, void*)
 	Rect areac(500, 200, 250, 100);
 	Rect arear(500, 300, 250, 100);
 	Rect areae(500, 400, 250, 100);
+	Rect areacon(750, 0, 250, 100);
 	Mat savefile;
 	string name;
 	savefile = src(Rect(0, 0, 500, 500));
@@ -38,14 +41,14 @@ void on_mouse(int event, int x, int y, int flags, void*)
 		pt0ld = Point(x, y);
 		if (areas.contains(pt0ld)) {						//save
 			cout << "save" << endl;
-			cout << "∆ƒ¿œ¿Ã∏ß ¿‘∑¬(.jpg∆˜«‘): ";
+			cout << "ÌååÏùºÏù¥Î¶Ñ ÏûÖÎ†•(.jpgÌè¨Ìï®): ";
 			cin >> name;
 			imwrite(name, savefile);
 		}
 		if (areal.contains(pt0ld)) {						//load
 			cout << "load" << endl;
 		load_image:
-			cout << "∫“∑Øø√ ∆ƒ¿œ ¿Ã∏ß ¿‘∑¬(.jpg∆˜«‘) : ";
+			cout << "Î∂àÎü¨Ïò¨ ÌååÏùº Ïù¥Î¶Ñ ÏûÖÎ†•(.jpgÌè¨Ìï®) : ";
 			cin >> name;
 			savefile = imread(name);
 			if (savefile.empty())
@@ -62,13 +65,26 @@ void on_mouse(int event, int x, int y, int flags, void*)
 			savefile = (500, 500, CV_8UC3, Scalar(255, 255, 255));
 			rectangle(src, Point(0, 0), Point(500, 500), Scalar(0, 0, 0), 2);
 		}
-		if (arear.contains(pt0ld)) {						//run
+		if (arear.contains(pt0ld)) {
+			int numContours = countcontours(savefile);					//run
 			cout << "run" << endl;
-			detect(savefile);
+			if (numContours == 3) {
+				cout << "8" << endl;
+			}
+			if (numContours == 2) {
+				cout << "0, 6, 9" << endl;
+			}
+			if (numContours == 1) {
+				cout << "1, 2, 3, 4, 5, 7"<< endl;
+			}
 		}
 		if (areae.contains(pt0ld)) {						//exit
 			cout << "exit" << endl;
 			exit(1);
+		}
+		if (areacon.contains(pt0ld)) {
+			int numContours = countcontours(savefile);
+			cout << "Ïô∏Í≥ΩÏÑ†Ïùò Í∞ØÏàò: " << numContours << endl;
 		}
 		break;
 
@@ -95,6 +111,8 @@ void box(Mat& src)
 	line(src, Point(500, 300), Point(src.cols - 1, 300), Scalar(0, 0, 0), 2);
 	line(src, Point(500, 400), Point(src.cols - 1, 400), Scalar(0, 0, 0), 2);
 
+	line(src, Point(750, 0), Point(750, src.rows - 1), Scalar(0, 0, 0), 2);
+
 	line(src, Point(0, 0), Point(0, src.rows - 1), Scalar(0, 0, 0), 2);
 	line(src, Point(0, 0), Point(src.cols - 1, 0), Scalar(0, 0, 0), 2);
 	line(src, Point(0, src.rows - 1), Point(src.cols - 1, src.rows - 1), Scalar(0, 0, 0), 2);
@@ -102,17 +120,19 @@ void box(Mat& src)
 }
 void puttext(Mat& src)
 {
-	Mat save, load, clear, run, exit;
+	Mat save, load, clear, run, exit, contour;
 	save = src(Rect(500, 0, 250, 100));
 	load = src(Rect(500, 100, 250, 100));
 	clear = src(Rect(500, 200, 250, 100));
 	run = src(Rect(500, 300, 250, 100));
 	exit = src(Rect(500, 400, 250, 100));
+	contour = src(Rect(750, 0, 250, 100));
 	const String texts = "Save";
 	const String textl = "Load";
 	const String textc = "Clear";
 	const String textr = "Run";
 	const String texte = "Exit";
+	const String textcon = "Contour";
 	int fontFace = FONT_HERSHEY_SIMPLEX;
 	double fontScale = 2.0;
 	int thickness = 2;
@@ -137,43 +157,35 @@ void puttext(Mat& src)
 	Size sizeTextE = getTextSize(texte, fontFace, fontScale, thickness, 0);
 	Point exitorg((sizeImgE.width - sizeTextE.width) / 2, (sizeImgE.height + sizeTextE.height) / 2);
 
+	Size sizeImgCon = contour.size();
+	Size sizeTextcon = getTextSize(textcon, fontFace, fontScale, thickness, 0);
+	Point contorg((sizeImgCon.width - sizeTextcon.width) / 2, (sizeImgCon.height + sizeTextcon.height) / 2);
+
 	putText(save, texts, saveorg, fontFace, fontScale, Scalar(0, 0, 0), thickness);
 	putText(load, textl, loadorg, fontFace, fontScale, Scalar(0, 0, 0), thickness);
 	putText(clear, textc, clearorg, fontFace, fontScale, Scalar(0, 0, 0), thickness);
 	putText(run, textr, runorg, fontFace, fontScale, Scalar(0, 0, 0), thickness);
 	putText(exit, texte, exitorg, fontFace, fontScale, Scalar(0, 0, 0), thickness);
+	putText(contour, textcon, contorg, fontFace, fontScale, Scalar(0, 0, 0), thickness);
 
 
 }
-void detect(Mat& savefile)
+int countcontours(const Mat& savefile)
 {
 	vector<vector<Point>> contours;
+	findContours(grayy(savefile), contours, RETR_LIST, CHAIN_APPROX_NONE);
+	
+	return contours.size();
+}
+Mat grayy(const Mat& savefile)
+{
 	Mat gray;
-	int cX, cY;
 	cvtColor(savefile, gray, COLOR_BGR2GRAY);
 	threshold(gray, gray, 0, 255, THRESH_BINARY_INV | THRESH_OTSU);
 
 	Mat element = getStructuringElement(MORPH_RECT, Size(5, 5));
-
 	erode(gray, gray, element);
 	dilate(gray, gray, element);
 
-	//∑π¿Ã∫Ì∏µ ------------------------------------------------------------
-	Mat labels, stats, centroids;
-	int c = connectedComponentsWithStats(gray, labels, stats, centroids);
-	int* cc = stats.ptr<int>(1);
-	Rect c1(cc[0] - 1, cc[1] - 1, cc[2] + 3, cc[3] + 3);
-	c1 &= Rect(0, 0, gray.cols, gray.rows);
-	findContours(gray(c1), contours, RETR_LIST, CHAIN_APPROX_NONE);
-
-
-	int c1c;
-	c1c = connectedComponents(gray(c1), labels);
-	Mat contoursImage(savefile.size(), CV_8UC3, Scalar(0, 0, 0));
-	drawContours(contoursImage, contours, -1, Scalar(0, 255, 0), 2);
-	imshow("contours", contoursImage);
-	imshow("gray", gray(c1));
-	if (c1c == 3) {
-		cout << " 8 " << endl;
-	}
+	return gray;
 }
