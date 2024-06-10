@@ -15,7 +15,7 @@ https://www.youtube.com/watch?v=OvCnUivV7Qs
      void find2contours(Mat& savefile);		//외곽선2개를 갖는 수를 구분하는 함수
      Mat grayy(const Mat& savefile);		//그레이전환 및 이진화_inv
 	 vector<vector<Point>> convertContoursToPoints(const Mat& savefile);	//외곽선을 검출해서 2차원 백터에 저장 -> 다른 함수에서 계산을 최대한 줄이기 																			위함
-	 string name;											//savethefile과 loadthefile 두 함수에서 사용하기위해 전역변수로 사용
+	 string name;	//savethefile과 loadthefile 두 함수에서 사용하기위해 전역변수로 사용
 
 [마우스 이벤트](#마우스-이벤트)    
 [박스](#박스)    
