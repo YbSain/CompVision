@@ -12,14 +12,12 @@ void clearthefile(Mat& savefile);
 void runthefile(Mat& savefile);
 void box(Mat& src);
 void puttext(Mat& src);
+void showHistogram(const Mat& savefile);
 int countcontours(const Mat& savefile);
-int classifyNumber(const vector<Point>& contour);
-double calculateCircularity(const vector<Point>& contour);
-void momento(Mat& savefile);
-void lookcontours(Mat& savefile);
-bool isClosedContour(const vector<Point>& contour);
+void find2contours(Mat& savefile);
 vector<vector<Point>> convertContoursToPoints(const Mat& savefile);
 Mat grayy(const Mat& savefile);
+Mat findboundingbox(Mat& savefile);
 string name;
 Point centroid;
 Point medianPoint;
@@ -44,6 +42,7 @@ void on_mouse(int event, int x, int y, int flags, void*)
 	Rect arear(500, 300, 250, 100);
 	Rect areae(500, 400, 250, 100);
 	Rect areacon(750, 0, 250, 100);
+	Rect areah(750, 100, 250, 100);
 	Mat savefile;
 	savefile = src(Rect(2, 2, 495, 490));
 
@@ -69,8 +68,9 @@ void on_mouse(int event, int x, int y, int flags, void*)
 		}
 		if (areacon.contains(pt0ld)) {
 			int numContours = countcontours(savefile);
-			cout << "ø‹∞˚º±¿« ∞πºˆ: " << numContours << endl;
-			lookcontours(savefile);
+			cout << "Ïô∏Í≥ΩÏÑ†Ïùò Í∞ØÏàò: " << numContours << endl;
+		}
+		if (areah.contains(pt0ld)) {
 		}
 		break;
 
@@ -87,8 +87,6 @@ void on_mouse(int event, int x, int y, int flags, void*)
 		}
 		break;
 
-	case EVENT_RBUTTONDOWN:
-		return;
 	}
 
 	imshow("src", src);
@@ -111,19 +109,22 @@ void box(Mat& src)
 }
 void puttext(Mat& src)
 {
-	Mat save, load, clear, run, exit, contour;
+	Mat save, load, clear, run, exit, contour, hist;
 	save = src(Rect(500, 0, 250, 100));
 	load = src(Rect(500, 100, 250, 100));
 	clear = src(Rect(500, 200, 250, 100));
 	run = src(Rect(500, 300, 250, 100));
 	exit = src(Rect(500, 400, 250, 100));
 	contour = src(Rect(750, 0, 250, 100));
+	hist = src(Rect(750, 100, 250, 100));
+
 	const String texts = "Save";
 	const String textl = "Load";
 	const String textc = "Clear";
 	const String textr = "Run";
 	const String texte = "Exit";
 	const String textcon = "Contour";
+	const String texth = "hist";
 	int fontFace = FONT_HERSHEY_SIMPLEX;
 	double fontScale = 2.0;
 	int thickness = 2;
@@ -151,6 +152,10 @@ void puttext(Mat& src)
 	Size sizeImgCon = contour.size();
 	Size sizeTextcon = getTextSize(textcon, fontFace, fontScale, thickness, 0);
 	Point contorg((sizeImgCon.width - sizeTextcon.width) / 2, (sizeImgCon.height + sizeTextcon.height) / 2);
+	
+	Size sizeImgh = contour.size();
+	Size sizeTexth = getTextSize(texth, fontFace, fontScale, thickness, 0);
+	Point horg((sizeImgh.width - sizeTexth.width) / 2, (sizeImgh.height + sizeTexth.height) / 2);
 
 	putText(save, texts, saveorg, fontFace, fontScale, Scalar(0, 0, 0), thickness);
 	putText(load, textl, loadorg, fontFace, fontScale, Scalar(0, 0, 0), thickness);
@@ -158,12 +163,13 @@ void puttext(Mat& src)
 	putText(run, textr, runorg, fontFace, fontScale, Scalar(0, 0, 0), thickness);
 	putText(exit, texte, exitorg, fontFace, fontScale, Scalar(0, 0, 0), thickness);
 	putText(contour, textcon, contorg, fontFace, fontScale, Scalar(0, 0, 0), thickness);
-	
+	putText(hist, texth, horg, fontFace, fontScale, Scalar(0, 0, 0), thickness);
 }
 int countcontours(const Mat& savefile)
 {
+	Mat binaryImage = grayy(savefile);
 	vector<vector<Point>> contours;
-	findContours(grayy(savefile), contours, RETR_LIST, CHAIN_APPROX_NONE);
+	findContours(binaryImage, contours, RETR_LIST, CHAIN_APPROX_NONE);
 	return contours.size();
 }
 Mat grayy(const Mat& savefile)
@@ -173,28 +179,14 @@ Mat grayy(const Mat& savefile)
 	threshold(gray, gray, 0, 255, THRESH_BINARY_INV | THRESH_OTSU);
 
 	morphologyEx(gray, gray, MORPH_CLOSE, Mat(15, 15, CV_8UC1), Point(-1, -1));
-	imshow("gray", gray);
-	return gray;
-}
-void momento(Mat& savefile)
-{
-	Mat tmp;
-	savefile.copyTo(tmp);
-	vector<vector<Point>> contours;
-	findContours(grayy(savefile), contours, RETR_LIST, CHAIN_APPROX_NONE);
-	vector<Point> centroids;
-	vector<Point> medianPoints;
-	Moments momento = moments(contours[0]);
-	double cX = momento.m10 / momento.m00;
-	double cY = momento.m01 / momento.m00;
-	centroid = Point(static_cast<int>(cX), static_cast<int>(cY));
-	Rect boundingBox = boundingRect(contours[0]);
-	medianPoint = Point2f(static_cast<int>(boundingBox.x + boundingBox.width / 2), static_cast<int>(boundingBox.y + boundingBox.height / 2));
+
+	// imshow("gray", gray); // Ï£ºÏÑù Ï≤òÎ¶¨: gray Ïù¥ÎØ∏ÏßÄÎ•º ÌëúÏãúÌïòÏßÄ ÏïäÏùå
+	return gray; // Í∑∏Î†àÏù¥Ïä§ÏºÄÏùº Ïù¥ÎØ∏ÏßÄ Î∞òÌôò
 }
 void savethefile(Mat& savefile)
 {
 	cout << "save" << endl;
-	cout << "∆ƒ¿œ¿Ã∏ß ¿‘∑¬(.jpg∆˜«‘): ";
+	cout << "ÌååÏùºÏù¥Î¶Ñ ÏûÖÎ†•(.jpgÌè¨Ìï®): ";
 	cin >> name;
 	imwrite(name, savefile);
 }
@@ -202,7 +194,7 @@ void loadthefile(Mat& savefile)
 {
 	cout << "load" << endl;
 load_image:
-	cout << "∫“∑Øø√ ∆ƒ¿œ ¿Ã∏ß ¿‘∑¬(.jpg∆˜«‘) : ";
+	cout << "Î∂àÎü¨Ïò¨ ÌååÏùº Ïù¥Î¶Ñ ÏûÖÎ†•(.jpgÌè¨Ìï®) : ";
 	cin >> name;
 	savefile = imread(name);
 	if (savefile.empty())
@@ -227,41 +219,84 @@ void runthefile(Mat& savefile)
 		cout << "8" << endl;
 	}
 	if (numContours == 2) {
-		cout << "0, 6, 9" << endl;
-		vector<vector<Point>> contours = convertContoursToPoints(savefile);
-		int number = classifyNumber(contours[0]);
-		cout << "is classified as number:" << number << endl;
+		find2contours(savefile);
 	}
 	if (numContours == 1) {
 		cout << "1, 2, 3, 4, 5, 7" << endl;
 	}
 }
-void lookcontours(Mat& savefile)
+void find2contours(Mat& savefile)
 {
 	Mat tmp;
 	savefile.copyTo(tmp);
-	vector<vector<Point>> points = convertContoursToPoints(savefile);
+	vector<vector<Point>> points = convertContoursToPoints(tmp);
+	int count = 0;
+	int largestIndex = 0;
+	int smallIndex = 0;
+	double largestArea = 0.0;
+	double smallArea = numeric_limits<double>::infinity();
+	double outerArea = 0.0;
 
 	for (int i = 0; i < points.size(); i++) {
-		Moments momento = moments(points[i]);
-		double cX = momento.m10 / momento.m00;
-		double cY = momento.m01 / momento.m00;
-		circle(tmp, Point(static_cast<int>(cX), static_cast<int>(cY)), 5, Scalar(0, 0, 255), -1);
-		Rect boundingBox = boundingRect(points[i]);
-		rectangle(tmp, boundingBox, Scalar(0, 255, 0), 2);
+		Rect bB = boundingRect(points[i]);
+		double outerArea = bB.width * bB.height;
+		if (outerArea > largestArea) {
+			largestArea = outerArea;
+			largestIndex = i;
+		}
+		if (outerArea < smallArea) {
+			smallArea = outerArea;
+			smallIndex = i;
+		}
 	}
-	imshow("boundingBoxes", tmp);
+	double ratio = smallArea / largestArea;
+	if (ratio > 0.7) {
+		cout << "0" << endl;
+		return;
+	}
+	Moments momento = moments(points[largestIndex]);
+	double cX = momento.m10 / momento.m00;
+	double cY = momento.m01 / momento.m00;
+	centroid = Point(static_cast<int>(cX), static_cast<int>(cY));
+	for (int i = 0; i < points.size(); i++) {
+		Rect boundingBox = boundingRect(points[largestIndex]);
+		Rect boundingBoy = boundingRect(points[smallIndex]);
+		if (static_cast<int>(cY) < static_cast<int>(boundingBox.y + boundingBox.height / 2)) {
+			count++;
+		}
+		else if (static_cast<int>(cY) > static_cast<int>(boundingBox.y + boundingBox.height / 2)) {
+			count--;
+		}
+		circle(tmp, centroid, 5, Scalar(255, 0, 255), -1);
+		rectangle(tmp, boundingBox, Scalar(0, 255, 0), 2);
+		rectangle(tmp, boundingBoy, Scalar(0, 255, 255), 2);
+	}
+	if (count > 0) {
+		cout << "9" << endl;
+		count = 0;
+	}
+	else if (count < 0) {
+		cout << "6" << endl;
+		count = 0;
+	}
+	imshow("tmp", tmp);
 }
-bool isClosedContour(const vector<Point>& contour)
+Mat findboundingbox(Mat& savefile)
 {
-
-	Point startPoint = contour.front();
-	Point endPoint = contour.back();
-	return startPoint == endPoint;
+	Mat tmp;
+	savefile.copyTo(tmp);
+	vector<vector<Point>> points = convertContoursToPoints(tmp);
+	Mat box(savefile.size(), CV_8UC1);
+	for (int i = 0; i < points.size(); i++) {
+		Rect boundingBox = boundingRect(points[i]);
+		rectangle(box, boundingBox, Scalar(255), -1);
+	}
+	return box;
 }
 vector<vector<Point>> convertContoursToPoints(const Mat& savefile) {	
 	vector<vector<Point>> points, contours;
-	findContours(grayy(savefile), contours, RETR_LIST, CHAIN_APPROX_NONE);
+	Mat grayImage = grayy(savefile);
+	findContours(grayImage, contours, RETR_LIST, CHAIN_APPROX_NONE);
 	for (int i = 0; i < contours.size(); ++i) {
 		vector<Point> contourPoints;
 		for (int j = 0; j < contours[i].size(); ++j) {
@@ -271,31 +306,4 @@ vector<vector<Point>> convertContoursToPoints(const Mat& savefile) {
 	}
 
 	return points;
-}
-
-double calculateCircularity(const vector<Point>& contour)
-{
-	double area = contourArea(contour);
-	double perimeter = arcLength(contour, true);
-	double circularity = 4 * CV_PI * area / (perimeter * perimeter);
-	return circularity;
-}
-
-int classifyNumber(const vector<Point>& contour)
-{
-	bool isClosed = isClosedContour(contour);
-
-	if (isClosed) {
-		double circularity = calculateCircularity(contour);
-		double circularityThreshold = 0.8;
-		if (circularity > circularityThreshold) {
-			return 0;
-		}
-		else {
-			return 6;
-		}
-	}
-	else {
-		return 9;
-	}
 }
