@@ -115,18 +115,18 @@ _반복적으로 쓰인것은 생략_
 저장은 비교적 간단하게 사용했다
 [목차로 돌아가기](#진행상황)   
 ## 불러오기
-	 cout << "load" << endl;
- load_image:		//파일이름이 없을경우 다시 물어보기
-	 cout << "불러올 파일 이름 입력(.jpg포함) : ";
-	 cin >> name;
-	 savefile = imread(name);
-	 if (savefile.empty())
-	 {
-		 cerr << "Image Loaded Failed!" << endl;
-		 goto load_image;		//load_image로 돌아가서 다시 시작
-	 }
-	 Mat roi = src(Rect(2, 2, 495, 490));	//원본이미지 src에서 검은선을 제외하고 위에서 선언한 savefile만큼의 Rect범위를roi로 앝은복사
-	 savefile.copyTo(roi);		//원본이미지에서 roi즉 savefile 만큼의 범위에 맞게 불러오기가 된다.
+		 cout << "load" << endl;
+ 	load_image:		//파일이름이 없을경우 다시 물어보기
+	 	cout << "불러올 파일 이름 입력(.jpg포함) : ";
+	 	cin >> name;
+	 	savefile = imread(name);
+	 	if (savefile.empty())
+	 	{
+		 	cerr << "Image Loaded Failed!" << endl;
+		 	goto load_image;		//load_image로 돌아가서 다시 시작
+	 	}
+	 	Mat roi = src(Rect(2, 2, 495, 490));	//원본이미지 src에서 검은선을 제외하고 위에서 선언한 savefile만큼의 Rect범위를roi로 앝은복사
+	 	savefile.copyTo(roi);		//원본이미지에서 roi즉 savefile 만큼의 범위에 맞게 불러오기가 된다.
 [목차로 돌아가기](#진행상황)   
 ## Clear
 
