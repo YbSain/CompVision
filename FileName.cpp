@@ -16,7 +16,6 @@ int countcontours(const Mat& savefile);
 void find2contours(Mat& savefile);
 vector<vector<Point>> convertContoursToPoints(const Mat& savefile);
 Mat grayy(const Mat& savefile);
-Mat findboundingbox(Mat& savefile);
 string name;
 Point centroid;
 Point medianPoint;
@@ -41,7 +40,6 @@ void on_mouse(int event, int x, int y, int flags, void*)
 	Rect arear(500, 300, 250, 100);
 	Rect areae(500, 400, 250, 100);
 	Rect areacon(750, 0, 250, 100);
-	Rect areah(750, 100, 250, 100);
 	Mat savefile;
 	savefile = src(Rect(2, 2, 495, 490));
 
@@ -68,8 +66,6 @@ void on_mouse(int event, int x, int y, int flags, void*)
 		if (areacon.contains(pt0ld)) {
 			int numContours = countcontours(savefile);
 			cout << "외곽선의 갯수: " << numContours << endl;
-		}
-		if (areah.contains(pt0ld)) {
 		}
 		break;
 
@@ -151,7 +147,7 @@ void puttext(Mat& src)
 	Size sizeImgCon = contour.size();
 	Size sizeTextcon = getTextSize(textcon, fontFace, fontScale, thickness, 0);
 	Point contorg((sizeImgCon.width - sizeTextcon.width) / 2, (sizeImgCon.height + sizeTextcon.height) / 2);
-	
+
 	Size sizeImgh = contour.size();
 	Size sizeTexth = getTextSize(texth, fontFace, fontScale, thickness, 0);
 	Point horg((sizeImgh.width - sizeTexth.width) / 2, (sizeImgh.height + sizeTexth.height) / 2);
@@ -234,17 +230,17 @@ void find2contours(Mat& savefile)
 	int smallIndex = 0;
 	double largestArea = 0.0;
 	double smallArea = numeric_limits<double>::infinity();
-	double outerArea = 0.0;
+	double area = 0.0;
 
 	for (int i = 0; i < points.size(); i++) {
 		Rect bB = boundingRect(points[i]);
-		double outerArea = bB.width * bB.height;
-		if (outerArea > largestArea) {
-			largestArea = outerArea;
+		double area = bB.width * bB.height;
+		if (area > largestArea) {
+			largestArea = area;
 			largestIndex = i;
 		}
-		if (outerArea < smallArea) {
-			smallArea = outerArea;
+		if (area < smallArea) {
+			smallArea = area;
 			smallIndex = i;
 		}
 	}
@@ -280,19 +276,7 @@ void find2contours(Mat& savefile)
 	}
 	imshow("tmp", tmp);
 }
-Mat findboundingbox(Mat& savefile)
-{
-	Mat tmp;
-	savefile.copyTo(tmp);
-	vector<vector<Point>> points = convertContoursToPoints(tmp);
-	Mat box(savefile.size(), CV_8UC1);
-	for (int i = 0; i < points.size(); i++) {
-		Rect boundingBox = boundingRect(points[i]);
-		rectangle(box, boundingBox, Scalar(255), -1);
-	}
-	return box;
-}
-vector<vector<Point>> convertContoursToPoints(const Mat& savefile) {	
+vector<vector<Point>> convertContoursToPoints(const Mat& savefile) {
 	vector<vector<Point>> points, contours;
 	Mat grayImage = grayy(savefile);
 	findContours(grayImage, contours, RETR_LIST, CHAIN_APPROX_NONE);
