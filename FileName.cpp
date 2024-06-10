@@ -12,7 +12,6 @@ void clearthefile(Mat& savefile);
 void runthefile(Mat& savefile);
 void box(Mat& src);
 void puttext(Mat& src);
-void showHistogram(const Mat& savefile);
 int countcontours(const Mat& savefile);
 void find2contours(Mat& savefile);
 vector<vector<Point>> convertContoursToPoints(const Mat& savefile);
