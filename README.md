@@ -161,7 +161,7 @@ return값, 외곽선 갯수
 
 ## 외곽선의 2차원행렬
 
-![image](https://github.com/YbSain/CompVision/assets/108385276/56a0bcbb-73fb-4a26-94f2-a1d574091bab)
+![image](https://github.com/YbSain/CompVision/assets/108385276/56a0bcbb-73fb-4a26-94f2-a1d574091bab)   
 
 push_back과 1차원행렬을 이용해서 2차원행렬값에 대입한 뒤, return 해주었다.
 
@@ -182,7 +182,7 @@ push_back과 1차원행렬을 이용해서 2차원행렬값에 대입한 뒤, re
 [목차로 돌아가기](#진행상황)    
 ## 2개짜리 외곽선 0, 6, 9 검출
 
-![image](https://github.com/YbSain/CompVision/assets/108385276/e98d3ffc-57d1-4adb-82c1-ecf99c177f1f)
+![image](https://github.com/YbSain/CompVision/assets/108385276/e98d3ffc-57d1-4adb-82c1-ecf99c177f1f)   
 
 위 사진과 같이 __points__ 로 2차원행렬로 외곽선을 받아옴    
 ### 변수들의 각자 역할
@@ -191,13 +191,13 @@ push_back과 1차원행렬을 이용해서 2차원행렬값에 대입한 뒤, re
 	 double largestArea, smallArea(numeric_limits<double>::infinity();	//largestArea는 0.0으로 smallArea는 한계값으로 받아서 넓이를 받기 위함
   	 double area = 0.0;					//검출된 외곽선의 넓이를 구함
 ### 넓이와 최댓값, 최솟값 구하기
-![image](https://github.com/YbSain/CompVision/assets/108385276/66f23f04-6514-4baf-a9e6-08fd9c0908b9)
+![image](https://github.com/YbSain/CompVision/assets/108385276/66f23f04-6514-4baf-a9e6-08fd9c0908b9)   
 위 반복문을 사용해서 최댓값과 최솟값을 지정(함수자체가 외곽선 2개일때 실행되기때문에 두개의 값이 같게 나오지않음-변수는 있을지도)   
 ### 구해진 최솟값과, 최댓값의 비율로 0 뽑아내기
-![image](https://github.com/YbSain/CompVision/assets/108385276/3e3729bd-fe61-4c6d-bba4-4b1d5f4780a6)
+![image](https://github.com/YbSain/CompVision/assets/108385276/3e3729bd-fe61-4c6d-bba4-4b1d5f4780a6)   
 글씨를 8픽셀로 적용했고 6과 9과다르게 0의 외곽선은 서로 큰 차이를 보기 힘들기 때문에 비율을 0.7이상일 경우 0으로 지정했다.   
 ### 무게중심을 구한 뒤, 바운딩 박스의 중점과  높이 차이를 비교하여 중점보다 높을경우 9, 낮을경우 6을 출력
-![image](https://github.com/YbSain/CompVision/assets/108385276/d7a0e3a5-17e8-4a8f-9f94-2750c02f6ef2)
+![image](https://github.com/YbSain/CompVision/assets/108385276/d7a0e3a5-17e8-4a8f-9f94-2750c02f6ef2)   
 중간에 있는boundingBoy와 circle, rectange imshow는 추후 지울예정
 __이곳에서 무게중심과 중점 기준으로 x좌표를 비교해서 왼쪽일경우 4로 지정까지 해서 구분지을 예정__
 
