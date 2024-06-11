@@ -104,14 +104,13 @@ void box(Mat& src)
 }
 void puttext(Mat& src)
 {
-	Mat save, load, clear, run, exit, contour, hist;
+	Mat save, load, clear, run, exit, contour;
 	save = src(Rect(500, 0, 250, 100));
 	load = src(Rect(500, 100, 250, 100));
 	clear = src(Rect(500, 200, 250, 100));
 	run = src(Rect(500, 300, 250, 100));
 	exit = src(Rect(500, 400, 250, 100));
 	contour = src(Rect(750, 0, 250, 100));
-	hist = src(Rect(750, 100, 250, 100));
 
 	const String texts = "Save";
 	const String textl = "Load";
@@ -148,17 +147,12 @@ void puttext(Mat& src)
 	Size sizeTextcon = getTextSize(textcon, fontFace, fontScale, thickness, 0);
 	Point contorg((sizeImgCon.width - sizeTextcon.width) / 2, (sizeImgCon.height + sizeTextcon.height) / 2);
 
-	Size sizeImgh = contour.size();
-	Size sizeTexth = getTextSize(texth, fontFace, fontScale, thickness, 0);
-	Point horg((sizeImgh.width - sizeTexth.width) / 2, (sizeImgh.height + sizeTexth.height) / 2);
-
 	putText(save, texts, saveorg, fontFace, fontScale, Scalar(0, 0, 0), thickness);
 	putText(load, textl, loadorg, fontFace, fontScale, Scalar(0, 0, 0), thickness);
 	putText(clear, textc, clearorg, fontFace, fontScale, Scalar(0, 0, 0), thickness);
 	putText(run, textr, runorg, fontFace, fontScale, Scalar(0, 0, 0), thickness);
 	putText(exit, texte, exitorg, fontFace, fontScale, Scalar(0, 0, 0), thickness);
 	putText(contour, textcon, contorg, fontFace, fontScale, Scalar(0, 0, 0), thickness);
-	putText(hist, texth, horg, fontFace, fontScale, Scalar(0, 0, 0), thickness);
 }
 int countcontours(const Mat& savefile)
 {
@@ -255,7 +249,7 @@ void find2contours(Mat& savefile)
 	centroid = Point(static_cast<int>(cX), static_cast<int>(cY));
 	for (int i = 0; i < points.size(); i++) {
 		Rect boundingBox = boundingRect(points[largestIndex]);
-		Rect boundingBoy = boundingRect(points[smallIndex]);
+		Rect innerboundingBox = boundingRect(points[smallIndex]);
 		if (static_cast<int>(cY) < static_cast<int>(boundingBox.y + boundingBox.height / 2)) {
 			count++;
 		}
@@ -264,7 +258,7 @@ void find2contours(Mat& savefile)
 		}
 		circle(tmp, centroid, 5, Scalar(255, 0, 255), -1);
 		rectangle(tmp, boundingBox, Scalar(0, 255, 0), 2);
-		rectangle(tmp, boundingBoy, Scalar(0, 255, 255), 2);
+		rectangle(tmp, innerboundingBox, Scalar(0, 255, 255), 2);
 	}
 	if (count > 0) {
 		cout << "9" << endl;
