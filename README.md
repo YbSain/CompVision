@@ -1,8 +1,8 @@
 # 필기체 인식
 
 ## OpenCV를 활용해 필기체 숫자를 인식하는 프로그램임
-
-https://www.youtube.com/watch?v=OvCnUivV7Qs
+[
+https://www.youtube.com/watch?v=OvCnUivV7Qs](https://www.youtube.com/watch?v=E2hCJnQhYqs)
 
 ### 진행상황
 
