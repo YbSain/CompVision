@@ -245,7 +245,7 @@ void test_number_score(Mat savefile)
                         int ex_cnt = connectedComponents(learning_number[k](rec), labels);
                         if (ex_cnt >= 2 && cnt >= 2) identify_number_D[k]++;
                         else if (ex_cnt >= 2 && cnt < 2) identify_number_D[k]--;
-                        else if (ex_cnt < 2 && cnt >= 2) identify_number_D[k]--;
+                        else if (ex_cnt < 2 && cnt >= 2) identify_number_D[k]++;
                     }
                 }
             }
@@ -325,8 +325,6 @@ void plus_learning_number(Mat preImg, int i) {
     Mat labels;
     Mat tmp;
     preImg.copyTo(tmp);
-    cvtColor(tmp, tmp, COLOR_BGR2GRAY);
-    threshold(tmp, tmp, 0, 255, THRESH_BINARY_INV | THRESH_OTSU);
     for (int x = 0; x < 10; x++) {
         for (int y = 0; y < 10; y++) {
             Rect rec(x * col, y * row, col, row);
@@ -340,15 +338,19 @@ void study_num_data_recog() {
         learning_number[i] = Mat::zeros(400, 300, CV_8UC1);
         string fileName = "./numberdata/";
         fileName += to_string(i);
-        for (int j = 1; j <= 30; j++) { //데이터 수가 늘어난다면 60이 위치한 값을 변경 
+        for (int j = 1; j <= 50; j++) { //데이터 수가 늘어난다면 60이 위치한 값을 변경 
             string number_name = "";
             if (j < 10) number_name += ("0" + to_string(j));
             else number_name += ("" + to_string(j));
             number_name += "data.png";
             string final_path = fileName + number_name;
             Mat img = imread(final_path);
+            Mat gray, resized_gray;
+            cvtColor(img, gray, COLOR_BGR2GRAY);
+            threshold(gray, gray, 0, 255, THRESH_BINARY_INV | THRESH_OTSU);
+            resized_gray = resiz(gray);
             if (img.empty()) { cout << "image is empty pls check filename : " << final_path; }
-            plus_learning_number(img, i);
+            plus_learning_number(gray, i);
         }
     }
     for (int i = 0; i < 10; i++) {  //데이터셋이 충분하지 않아 25 이상이면 정답으로 처리 
