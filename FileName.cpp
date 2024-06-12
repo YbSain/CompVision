@@ -1,10 +1,13 @@
 #include<opencv2/opencv.hpp>
 #include<iostream>
+#include<random>
 using namespace std;
 using namespace cv;
 
+
 Mat src(500, 1000, CV_8UC3, Scalar(255, 255, 255));
 Point pt0ld;
+Scalar getRandomColor();
 void on_mouse(int event, int x, int y, int flags, void*);
 void savethefile(Mat& savefile);
 void loadthefile(Mat& savefile);
@@ -31,7 +34,19 @@ int main(void)
 	waitKey();
 	return 0;
 }
+Scalar getRandomColor() {
+	// C++11 표준 랜덤 장치와 분포 설정
+	random_device rd;
+	mt19937 gen(rd());
+	uniform_int_distribution<int> dis(0, 255); // 0부터 255까지의 랜덤 값 생성
 
+	// 랜덤한 BGR 색상 생성
+	int b = dis(gen);
+	int g = dis(gen);
+	int r = dis(gen);
+
+	return Scalar(b, g, r); // BGR 순서
+}
 void on_mouse(int event, int x, int y, int flags, void*)
 {
 	Rect areas(500, 0, 250, 100);
@@ -42,7 +57,8 @@ void on_mouse(int event, int x, int y, int flags, void*)
 	Rect areacon(750, 0, 250, 100);
 	Mat savefile;
 	savefile = src(Rect(2, 2, 495, 490));
-
+	static Scalar ranc = Scalar(255, 255, 255);
+	static Point pt0ld = Point(-1, -1);
 	switch (event) {
 	case EVENT_LBUTTONDOWN:
 		pt0ld = Point(x, y);
@@ -68,22 +84,29 @@ void on_mouse(int event, int x, int y, int flags, void*)
 			cout << "외곽선의 갯수: " << numContours << endl;
 		}
 		break;
-
 	case EVENT_MOUSEMOVE:
 		if (flags & EVENT_FLAG_LBUTTON) {
 			line(src(Rect(0, 0, 500, 500)), pt0ld, Point(x, y), Scalar(0, 0, 0), 8);
 			imshow("src", src);
-			pt0ld = Point(x, y);
 		}
-		if (flags & EVENT_FLAG_RBUTTON) {
-			line(src(Rect(0, 0, 500, 500)), pt0ld, Point(x, y), Scalar(255, 255, 255), 9);
+		if ((flags & EVENT_FLAG_RBUTTON) && (flags & EVENT_FLAG_CTRLKEY)) {
+			line(src(Rect(0, 0, 500, 500)), pt0ld, Point(x, y), Scalar(255, 255, 255), 8);
 			imshow("src", src);
-			pt0ld = Point(x, y);
 		}
+		else if (flags & EVENT_FLAG_RBUTTON) {
+			line(src(Rect(0, 0, 500, 500)), pt0ld, Point(x, y), ranc, 9);
+			imshow("src", src);
+		}
+		pt0ld = Point(x, y);
 		break;
-
+	case EVENT_FLAG_RBUTTON:
+		ranc = getRandomColor();
+		break;
+	case EVENT_LBUTTONUP:
+	case EVENT_RBUTTONUP:
+		pt0ld = Point(-1, -1); // 마우스 버튼을 떼면 초기화
+		break;
 	}
-
 	imshow("src", src);
 }
 
