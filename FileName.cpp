@@ -65,7 +65,7 @@ int main(void) {
 //
 //    }
 //}
-void box(Mat& src){
+void box(Mat& src) {
     line(src, Point(500, 0), Point(500, src.rows - 1), Scalar(0, 0, 0), 2);
     line(src, Point(500, 100), Point(src.cols - 1, 100), Scalar(0, 0, 0), 2);
     line(src, Point(500, 200), Point(src.cols - 1, 200), Scalar(0, 0, 0), 2);
@@ -79,7 +79,7 @@ void box(Mat& src){
     line(src, Point(0, src.rows - 1), Point(src.cols - 1, src.rows - 1), Scalar(0, 0, 0), 2);
     line(src, Point(src.cols - 1, 0), Point(src.cols - 1, src.rows - 1), Scalar(0, 0, 0), 2);
 }
-void puttext(Mat& src){
+void puttext(Mat& src) {
     Mat save, load, clear, run, exit, contour;
     save = src(Rect(500, 0, 250, 100));
     load = src(Rect(500, 100, 250, 100));
@@ -130,7 +130,7 @@ void puttext(Mat& src){
     putText(exit, texte, exitorg, fontFace, fontScale, Scalar(0, 0, 0), thickness);
     putText(contour, textcon, contorg, fontFace, fontScale, Scalar(0, 0, 0), thickness);
 }
-void on_mouse(int event, int x, int y, int flags, void*){
+void on_mouse(int event, int x, int y, int flags, void*) {
     Rect areas(500, 0, 250, 100);
     Rect areal(500, 100, 250, 100);
     Rect areac(500, 200, 250, 100);
@@ -211,8 +211,8 @@ void runthefile(Mat& savefile)
     cout << "run" << endl;
     test_number_score(savefile);
 }
-void test_number_score(Mat savefile) 
-{    
+void test_number_score(Mat savefile)
+{
     Mat tmp, gray, bin;
     savefile.copyTo(tmp);
     cvtColor(tmp, gray, COLOR_BGR2GRAY);
@@ -276,7 +276,7 @@ void test_number_score(Mat savefile)
     for (int i = 0; i < 10; i++) {
         cout << i << " 숫자에 대한 점수 : " << identify_number_D[i] << endl;
     }
-    cout << "가장 확률이 가까운 숫자 2개: " << index_num[0] << ", " << index_num[1] << endl << endl;
+    cout << "가장 유사한 숫자 2개(점수가 높은 순): " << index_num[0] << ", " << index_num[1] << endl << endl;
 
     identify_number[index_num[0]][2] = 1;
     if (index_num[0] - index_num[1] > 3) {
@@ -354,6 +354,6 @@ void study_num_data_recog() {
         }
     }
     for (int i = 0; i < 10; i++) {  //데이터셋이 충분하지 않아 25 이상이면 정답으로 처리 
-        threshold(learning_number[i], learning_number[i], 25, 255, THRESH_BINARY);
+        threshold(learning_number[i], learning_number[i], 15, 255, THRESH_BINARY);
     }
 }
